@@ -2,11 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// OBJECT POOL pattern for projectiles.
-/// - Pre-initialised: all bullets are created once in Awake (before gameplay).
-/// - Reusable: Get() takes an inactive bullet, Return() puts it back.
-/// - No Instantiate/Destroy during gameplay.
-/// One pool for the player's bullets, another for the shooter enemies' bullets.
+// OBJECT POOL pattern for projectiles.
 /// </summary>
 public class ProjectilePool : MonoBehaviour
 {

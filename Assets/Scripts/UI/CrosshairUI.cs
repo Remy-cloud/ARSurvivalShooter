@@ -1,12 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Moves the crosshair dot to wherever the gun barrel is pointing.
-/// Every frame it traces a line out of the Muzzle (along the barrel) and puts the dot
-/// on the first thing it hits - or on a point far ahead if it hits nothing.
-/// So: dot on the enemy = bullet will hit the enemy.
-/// Put this on the Crosshair UI Image.
-/// </summary>
+// Moves the crosshair dot to wherever the gun barrel is pointing.
+
 [RequireComponent(typeof(RectTransform))]
 public class CrosshairUI : MonoBehaviour
 {

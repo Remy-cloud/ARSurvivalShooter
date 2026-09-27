@@ -4,10 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Tap anywhere to shoot. The bullet leaves the gun's Muzzle and flies straight
-/// along the barrel (the CrosshairUI dot shows where that is).
-/// Bullets come from the ProjectilePool (no Instantiate/Destroy while playing).
-/// Put this on the GunHolder.
+// Tap anywhere to shoot. The bullet leaves the gun's Muzzle and flies straight
 /// </summary>
 public class PlayerShooter : MonoBehaviour
 {
@@ -32,7 +29,6 @@ public class PlayerShooter : MonoBehaviour
     [Tooltip("Temporary (until the GameManager exists): allow shooting as soon as the arena is placed.")]
     [SerializeField] private TapToPlaceArena enableWhenArenaPlaced;
 
-    /// <summary>Raised every time a bullet is fired (AudioManager listens to play the shot sound).</summary>
     public static event Action Shot;
 
     private float nextShotTime;
@@ -76,8 +72,8 @@ public class PlayerShooter : MonoBehaviour
 
     private void Fire()
     {
-        // The bullet leaves the mouth of the gun and flies exactly where the barrel points.
-        // The CrosshairUI shows that same line on screen, so "dot on target" = hit.
+        // The bullet flies exactly where the barrel points.
+
         Vector3 direction = muzzle.forward;
 
         if (!bulletPool.Fire(muzzle.position, direction, damage, hitMask)) return;   // pool empty: no shot
@@ -112,13 +108,13 @@ public class PlayerShooter : MonoBehaviour
 
     private static bool TapStartedThisFrame()
     {
-        // Phone
+
         if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
         {
             int id = Touchscreen.current.primaryTouch.touchId.ReadValue();
             return !IsOverUI(id);
         }
-        // Editor
+
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             return !IsOverUI(-1);
         return false;

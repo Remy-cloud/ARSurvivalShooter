@@ -176,6 +176,19 @@ public static class ARShooterSetup
         return mat;
     }
 
+    // Prints the real-world size (metres) of the selected object and its children.
+    [MenuItem("Tools/AR Shooter/Log Selected Size")]
+    public static void LogSelectedSize()
+    {
+        var go = Selection.activeGameObject;
+        if (go == null) { Debug.Log("Select an object first."); return; }
+        var renderers = go.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0) { Debug.Log(go.name + " has no renderers."); return; }
+        Bounds b = renderers[0].bounds;
+        foreach (var r in renderers) b.Encapsulate(r.bounds);
+        Debug.Log($"{go.name} size (m): width {b.size.x:0.###}, height {b.size.y:0.###}, depth {b.size.z:0.###}  | centre {b.center}");
+    }
+
     static void EnsureFolders(params string[] subs)
     {
         // Root is Assets itself - always exists

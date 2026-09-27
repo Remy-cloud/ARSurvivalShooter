@@ -1,9 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// A pooled bullet. It is never Instantiated or Destroyed during gameplay:
-/// the ProjectilePool hands it out with Launch(...) and takes it back with Release().
-/// Movement uses a raycast each frame so small, fast bullets never pass through targets.
+/// A pooled bullet.the ProjectilePool hands it out with Launch(...) and takes it back with Release().
 /// </summary>
 public class Projectile : MonoBehaviour
 {
