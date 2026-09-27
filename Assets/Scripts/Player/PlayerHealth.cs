@@ -9,6 +9,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public int Current { get; private set; }
     public int Max => maxHealth;
     public bool IsDead => Current <= 0;
+    public float DamageMultiplier { get; set; } = 1f;
 
     public event Action<int, int> HealthChanged;   // current, max
     public event Action Damaged;
@@ -26,7 +27,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (IsDead) return;
 
-        Current = Mathf.Max(Current - amount, 0);
+        Current = Mathf.Max(Current - Mathf.RoundToInt(amount * DamageMultiplier), 0);
         HealthChanged?.Invoke(Current, maxHealth);
         Damaged?.Invoke();
 

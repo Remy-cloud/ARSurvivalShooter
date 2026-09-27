@@ -26,8 +26,6 @@ public class PlayerShooter : MonoBehaviour
 
     [Header("State")]
     [SerializeField] private bool canShoot = false;       // GameManager turns this on during play
-    [Tooltip("Temporary (until the GameManager exists): allow shooting as soon as the arena is placed.")]
-    [SerializeField] private TapToPlaceArena enableWhenArenaPlaced;
 
     public static event Action Shot;
 
@@ -36,7 +34,15 @@ public class PlayerShooter : MonoBehaviour
     private Quaternion gunRestRot;
     private float flashTimer;
 
-    public bool CanShoot { get => canShoot; set => canShoot = value; }
+    public bool CanShoot
+    {
+        get => canShoot;
+        set
+        {
+            canShoot = value;
+            if (value) nextShotTime = Time.time + 0.3f;   // the tap that started the round isn't a shot
+        }
+    }
 
     private void Awake()
     {
@@ -46,19 +52,6 @@ public class PlayerShooter : MonoBehaviour
             gunRestRot = gunModel.localRotation;
         }
         if (muzzleFlash) muzzleFlash.SetActive(false);
-        if (enableWhenArenaPlaced) enableWhenArenaPlaced.ArenaPlaced += OnArenaPlaced;
-    }
-
-    private void OnDestroy()
-    {
-        if (enableWhenArenaPlaced) enableWhenArenaPlaced.ArenaPlaced -= OnArenaPlaced;
-    }
-
-    // Wait one frame so the tap that placed the arena doesn't also fire a bullet.
-    private void OnArenaPlaced(Arena arena)
-    {
-        canShoot = true;
-        nextShotTime = Time.time + 0.3f;   // short delay so the placing tap isn't also a shot
     }
 
     private void Update()

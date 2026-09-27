@@ -9,9 +9,6 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private int maxAlive = 6;
     [SerializeField, Range(0f, 1f)] private float shooterChance = 0.35f;
 
-    [Header("Temporary (until GameManager)")]
-    [SerializeField] private TapToPlaceArena startWhenArenaPlaced;
-
     private readonly List<EnemyBase> alive = new List<EnemyBase>();
     private Arena arena;
     private Transform player;
@@ -20,15 +17,13 @@ public class EnemySpawner : MonoBehaviour
 
     public int AliveCount => alive.Count;
 
-    private void Awake()
-    {
-        player = Camera.main.transform;
-        if (startWhenArenaPlaced) startWhenArenaPlaced.ArenaPlaced += Begin;
-    }
+    private void Awake() => player = Camera.main.transform;
 
-    private void OnDestroy()
+    public void Configure(DifficultySettings settings)
     {
-        if (startWhenArenaPlaced) startWhenArenaPlaced.ArenaPlaced -= Begin;
+        spawnInterval = settings.spawnInterval;
+        maxAlive = settings.maxAlive;
+        shooterChance = settings.shooterChance;
     }
 
     public void Begin(Arena placedArena)
