@@ -9,6 +9,7 @@ public class GameUI : MonoBehaviour
 {
     [Header("Panels")]
     [SerializeField] private GameObject menuPanel;
+    [SerializeField] private GameObject leaderboardPanel;
     [SerializeField] private GameObject placingHint;
     [SerializeField] private GameObject hudPanel;
     [SerializeField] private GameObject endPanel;
@@ -17,6 +18,11 @@ public class GameUI : MonoBehaviour
     [Header("Menu")]
     [SerializeField] private Button easyButton;
     [SerializeField] private Button hardButton;
+    [SerializeField] private Button leaderboardButton;
+
+    [Header("Leaderboard Screen")]
+    [SerializeField] private TMP_Text menuBoardText;
+    [SerializeField] private Button backButton;
 
     [Header("HUD")]
     [SerializeField] private PlayerHealth playerHealth;
@@ -24,13 +30,20 @@ public class GameUI : MonoBehaviour
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text timeText;
+    [SerializeField] private float warningTime = 10f;
 
     [Header("End Screen")]
+    [SerializeField] private TMP_Text endTitleText;
     [SerializeField] private TMP_Text finalScoreText;
+    [SerializeField] private TMP_Text finalKillsText;
     [SerializeField] private TMP_Text finalTimeText;
     [SerializeField] private TMP_Text leaderboardText;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button menuButton;
+
+    private static readonly Color WinColor = new Color(0.3f, 0.85f, 0.45f);
+    private static readonly Color LoseColor = new Color(0.9f, 0.25f, 0.25f);
+    private static readonly Color WarningColor = new Color(1f, 0.35f, 0.3f);
 
     private GameManager game;
 
@@ -43,6 +56,8 @@ public class GameUI : MonoBehaviour
 
         easyButton.onClick.AddListener(() => game.StartGame(Difficulty.Easy));
         hardButton.onClick.AddListener(() => game.StartGame(Difficulty.Hard));
+        leaderboardButton.onClick.AddListener(() => ShowLeaderboard(true));
+        backButton.onClick.AddListener(() => ShowLeaderboard(false));
         restartButton.onClick.AddListener(game.Restart);
         menuButton.onClick.AddListener(game.BackToMenu);
 
@@ -58,18 +73,30 @@ public class GameUI : MonoBehaviour
 
     private void Update()
     {
-        if (game.State == GameState.Playing) timeText.text = Leaderboard.FormatTime(game.TimeSurvived);
+        if (game.State != GameState.Playing) return;
+        float remaining = game.TimeRemaining;
+        timeText.text = Leaderboard.FormatTime(Mathf.Ceil(remaining));
+        timeText.color = remaining <= warningTime ? WarningColor : Color.white;
     }
 
     private void OnStateChanged(GameState state)
     {
         menuPanel.SetActive(state == GameState.Menu);
+        leaderboardPanel.SetActive(false);
         placingHint.SetActive(state == GameState.Placing);
         hudPanel.SetActive(state == GameState.Playing);
         endPanel.SetActive(state == GameState.GameOver);
         crosshair.SetActive(state == GameState.Playing);
 
         if (state == GameState.GameOver) ShowResults();
+    }
+
+    // The leaderboard screen is part of the menu, so it just swaps with the menu panel.
+    private void ShowLeaderboard(bool show)
+    {
+        if (show) menuBoardText.text = BuildBoard();
+        leaderboardPanel.SetActive(show);
+        menuPanel.SetActive(!show);
     }
 
     private void OnScoreChanged(int score) => scoreText.text = $"Score {score}";
@@ -82,13 +109,22 @@ public class GameUI : MonoBehaviour
 
     private void ShowResults()
     {
-        finalScoreText.text = $"Score  {game.Score}";
-        finalTimeText.text = $"Time  {Leaderboard.FormatTime(game.TimeSurvived)}";
+        endTitleText.text = game.Survived ? "YOU SURVIVED!" : "GAME OVER";
+        endTitleText.color = game.Survived ? WinColor : LoseColor;
+        finalScoreText.text = game.Score.ToString();
+        finalKillsText.text = game.EnemiesDefeated.ToString();
+        finalTimeText.text = Leaderboard.FormatTime(game.TimeSurvived);
+        leaderboardText.text = BuildBoard();
+    }
 
+    private static string BuildBoard()
+    {
         List<Leaderboard.Entry> entries = Leaderboard.Load();
+        if (entries.Count == 0) return "<align=center><color=#999999>No games yet</color></align>";
+
         var sb = new StringBuilder();
         for (int i = 0; i < entries.Count; i++)
-            sb.AppendLine($"{i + 1}.   {entries[i].score} pts   {Leaderboard.FormatTime(entries[i].time)}");
-        leaderboardText.text = sb.ToString();
+            sb.AppendLine($"{i + 1}.<pos=18%>{entries[i].score} pts<pos=65%>{Leaderboard.FormatTime(entries[i].time)}");
+        return sb.ToString();
     }
 }

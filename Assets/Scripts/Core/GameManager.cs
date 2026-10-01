@@ -17,10 +17,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DifficultySettings easy = new DifficultySettings(3.5f, 4, 0.25f, 1f);
     [SerializeField] private DifficultySettings hard = new DifficultySettings(1.8f, 8, 0.45f, 1.5f);
 
+    [Header("Round")]
+    [SerializeField] private float timeLimit = 90f;
+
     public GameState State { get; private set; }
     public Difficulty Difficulty { get; private set; }
     public int Score { get; private set; }
     public float TimeSurvived { get; private set; }
+    public float TimeRemaining => Mathf.Max(0f, timeLimit - TimeSurvived);
+    public int EnemiesDefeated { get; private set; }
+    public bool Survived { get; private set; }
 
     public event Action<GameState> StateChanged;
     public event Action<int> ScoreChanged;
@@ -56,7 +62,9 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (State == GameState.Playing) TimeSurvived += Time.deltaTime;
+        if (State != GameState.Playing) return;
+        TimeSurvived = Mathf.Min(TimeSurvived + Time.deltaTime, timeLimit);
+        if (TimeSurvived >= timeLimit) EndRound(true);
     }
 
     public void StartGame(Difficulty difficulty)
@@ -91,6 +99,8 @@ public class GameManager : MonoBehaviour
 
         Score = 0;
         TimeSurvived = 0f;
+        EnemiesDefeated = 0;
+        Survived = false;
         ScoreChanged?.Invoke(Score);
 
         playerHealth.DamageMultiplier = s.damageMultiplier;
@@ -106,13 +116,18 @@ public class GameManager : MonoBehaviour
     {
         if (State != GameState.Playing) return;
         Score += enemy.ScoreValue;
+        EnemiesDefeated++;
         ScoreChanged?.Invoke(Score);
     }
 
-    private void OnPlayerDied()
+    private void OnPlayerDied() => EndRound(false);
+
+    // Ends the round: survived = the timer ran out before the player died.
+    private void EndRound(bool survived)
     {
         if (State != GameState.Playing) return;
 
+        Survived = survived;
         shooter.CanShoot = false;
         spawner.WipeAll();
         foreach (ProjectilePool pool in bulletPools) pool.ReturnAll();

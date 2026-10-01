@@ -12,6 +12,7 @@ public static class GameUISetup
     static readonly Color Accent = new Color(1f, 0.76f, 0.3f);
     static readonly Color Danger = new Color(0.9f, 0.25f, 0.25f);
     static readonly Color HealthColor = new Color(0.3f, 0.8f, 0.4f);
+    static readonly Color Muted = new Color(0.7f, 0.7f, 0.72f);
 
     [MenuItem("Tools/AR Shooter/Step 5 - Game Manager + UI")]
     public static void Build()
@@ -20,7 +21,7 @@ public static class GameUISetup
         if (!canvas) { Debug.LogError("No Canvas in the scene."); return; }
         Transform root = canvas.transform;
 
-        foreach (string old in new[] { "MenuPanel", "PlacingHint", "HUD", "EndPanel" })
+        foreach (string old in new[] { "MenuPanel", "LeaderboardPanel", "PlacingHint", "HUD", "EndPanel" })
         {
             Transform t = root.Find(old);
             if (t) Object.DestroyImmediate(t.gameObject);
@@ -28,10 +29,21 @@ public static class GameUISetup
 
         // Start menu
         RectTransform menu = Panel(root, "MenuPanel", PanelColor);
-        Label(menu, "Title", "AR SURVIVAL\nSHOOTER", 110, Accent, new Vector2(0.5f, 0.68f), new Vector2(1000, 300), FontStyles.Bold);
-        Label(menu, "Subtitle", "Choose difficulty", 50, Color.white, new Vector2(0.5f, 0.53f), new Vector2(900, 80));
-        Button easy = MakeButton(menu, "EasyButton", "EASY", new Vector2(0.5f, 0.44f));
-        Button hard = MakeButton(menu, "HardButton", "HARD", new Vector2(0.5f, 0.34f));
+        Label(menu, "Title", "AR SURVIVAL\nSHOOTER", 110, Accent, new Vector2(0.5f, 0.7f), new Vector2(1000, 300), FontStyles.Bold);
+        Label(menu, "Subtitle", "Choose difficulty", 50, Color.white, new Vector2(0.5f, 0.565f), new Vector2(900, 80));
+        Button easy = MakeButton(menu, "EasyButton", "EASY", new Vector2(0.5f, 0.485f));
+        Button hard = MakeButton(menu, "HardButton", "HARD", new Vector2(0.5f, 0.4f));
+        Button boardButton = MakeButton(menu, "LeaderboardButton", "LEADERBOARD", new Vector2(0.5f, 0.27f), Color.white);
+
+        // Leaderboard screen (opened from the menu)
+        RectTransform boardPanel = Panel(root, "LeaderboardPanel", PanelColor);
+        Label(boardPanel, "Title", "LEADERBOARD", 100, Accent, new Vector2(0.5f, 0.74f), new Vector2(1000, 140), FontStyles.Bold);
+        Label(boardPanel, "Subtitle", "Last 5 games", 44, Muted, new Vector2(0.5f, 0.68f), new Vector2(900, 70));
+        TMP_Text header = Label(boardPanel, "Header", "#<pos=18%>SCORE<pos=65%>TIME", 38, Muted, new Vector2(0.5f, 0.605f), new Vector2(640, 60), FontStyles.Bold);
+        header.alignment = TextAlignmentOptions.Left;
+        TMP_Text menuBoard = Label(boardPanel, "Entries", "", 50, Color.white, new Vector2(0.5f, 0.45f), new Vector2(640, 330));
+        menuBoard.alignment = TextAlignmentOptions.TopLeft;
+        Button back = MakeButton(boardPanel, "BackButton", "BACK", new Vector2(0.5f, 0.24f));
 
         // Placing hint
         RectTransform hint = Rect(root, "PlacingHint", new Vector2(0.5f, 0.15f), new Vector2(0.5f, 0.15f), Vector2.zero, new Vector2(900, 110));
@@ -54,22 +66,24 @@ public static class GameUISetup
         Place(scoreText.rectTransform, new Vector2(1, 1), new Vector2(-60, -160));
         scoreText.alignment = TextAlignmentOptions.Right;
 
-        TMP_Text timeText = Label(hud, "TimeText", "00:00", 48, Color.white, new Vector2(1, 1), new Vector2(300, 60), FontStyles.Bold);
+        TMP_Text timeText = Label(hud, "TimeText", "01:30", 48, Color.white, new Vector2(1, 1), new Vector2(300, 60), FontStyles.Bold);
         Place(timeText.rectTransform, new Vector2(1, 1), new Vector2(-60, -235));
         timeText.alignment = TextAlignmentOptions.Right;
 
         // End screen
         RectTransform end = Panel(root, "EndPanel", PanelColor);
-        Label(end, "Title", "GAME OVER", 120, Danger, new Vector2(0.5f, 0.8f), new Vector2(1000, 160), FontStyles.Bold);
-        TMP_Text finalScore = Label(end, "FinalScore", "Score  0", 70, Accent, new Vector2(0.5f, 0.7f), new Vector2(900, 90), FontStyles.Bold);
-        TMP_Text finalTime = Label(end, "FinalTime", "Time  00:00", 56, Color.white, new Vector2(0.5f, 0.64f), new Vector2(900, 80));
-        Label(end, "BoardTitle", "LAST 5 GAMES", 48, new Color(0.75f, 0.75f, 0.75f), new Vector2(0.5f, 0.55f), new Vector2(900, 70), FontStyles.Bold);
-        TMP_Text board = Label(end, "Leaderboard", "", 48, Color.white, new Vector2(0.5f, 0.42f), new Vector2(800, 340));
-        board.alignment = TextAlignmentOptions.Top;
-        Button restart = MakeButton(end, "RestartButton", "RESTART", new Vector2(0.5f, 0.22f));
-        Button menuButton = MakeButton(end, "MenuButton", "MENU", new Vector2(0.5f, 0.12f));
+        TMP_Text endTitle = Label(end, "Title", "GAME OVER", 110, Danger, new Vector2(0.5f, 0.83f), new Vector2(1000, 160), FontStyles.Bold);
+        TMP_Text finalScore = Stat(end, "Score", "SCORE", 0.2f, Accent);
+        TMP_Text finalKills = Stat(end, "Kills", "ENEMIES\nDEFEATED", 0.5f, Color.white);
+        TMP_Text finalTime = Stat(end, "Time", "TIME\nSURVIVED", 0.8f, Color.white);
+        Label(end, "BoardTitle", "LAST 5 GAMES", 44, Muted, new Vector2(0.5f, 0.585f), new Vector2(900, 70), FontStyles.Bold);
+        TMP_Text board = Label(end, "Leaderboard", "", 46, Color.white, new Vector2(0.5f, 0.45f), new Vector2(640, 300));
+        board.alignment = TextAlignmentOptions.TopLeft;
+        Button restart = MakeButton(end, "RestartButton", "RESTART", new Vector2(0.5f, 0.26f));
+        Button menuButton = MakeButton(end, "MenuButton", "MENU", new Vector2(0.5f, 0.165f), Color.white);
 
         menu.gameObject.SetActive(true);
+        boardPanel.gameObject.SetActive(false);
         hint.gameObject.SetActive(false);
         hud.gameObject.SetActive(false);
         end.gameObject.SetActive(false);
@@ -93,6 +107,12 @@ public static class GameUISetup
         GameUI ui = GetOrAdd<GameUI>(canvas.gameObject);
         var uiSo = new SerializedObject(ui);
         uiSo.FindProperty("menuPanel").objectReferenceValue = menu.gameObject;
+        uiSo.FindProperty("leaderboardPanel").objectReferenceValue = boardPanel.gameObject;
+        uiSo.FindProperty("leaderboardButton").objectReferenceValue = boardButton;
+        uiSo.FindProperty("menuBoardText").objectReferenceValue = menuBoard;
+        uiSo.FindProperty("backButton").objectReferenceValue = back;
+        uiSo.FindProperty("endTitleText").objectReferenceValue = endTitle;
+        uiSo.FindProperty("finalKillsText").objectReferenceValue = finalKills;
         uiSo.FindProperty("placingHint").objectReferenceValue = hint.gameObject;
         uiSo.FindProperty("hudPanel").objectReferenceValue = hud.gameObject;
         uiSo.FindProperty("endPanel").objectReferenceValue = end.gameObject;
@@ -158,13 +178,21 @@ public static class GameUISetup
         return t;
     }
 
-    static Button MakeButton(Transform parent, string name, string text, Vector2 anchor)
+    // A stat column on the end screen: small label on top, big value below.
+    static TMP_Text Stat(Transform parent, string name, string label, float x, Color valueColor)
+    {
+        TMP_Text l = Label(parent, name + "Label", label, 34, Muted, new Vector2(x, 0.725f), new Vector2(300, 100), FontStyles.Bold);
+        l.alignment = TextAlignmentOptions.Bottom;
+        return Label(parent, name + "Value", "0", 80, valueColor, new Vector2(x, 0.66f), new Vector2(300, 100), FontStyles.Bold);
+    }
+
+    static Button MakeButton(Transform parent, string name, string text, Vector2 anchor, Color? textColor = null)
     {
         RectTransform rt = Rect(parent, name, anchor, anchor, Vector2.zero, new Vector2(600, 130));
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.gameObject.AddComponent<Image>().color = ButtonColor;
         Button b = rt.gameObject.AddComponent<Button>();
-        Label(rt, "Label", text, 64, Accent, new Vector2(0.5f, 0.5f), new Vector2(600, 130), FontStyles.Bold);
+        Label(rt, "Label", text, 64, textColor ?? Accent, new Vector2(0.5f, 0.5f), new Vector2(600, 130), FontStyles.Bold);
         return b;
     }
 

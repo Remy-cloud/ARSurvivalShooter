@@ -55,8 +55,8 @@ MonoBehaviour:
   - {fileID: 5189872981192413033}
   hitColor: {r: 1, g: 0.35, b: 0.35, a: 1}
   hitFlashTime: 0.1
-  damage: 10
-  attackCooldown: 1.2
+  damage: 5
+  attackCooldown: 2
   animator: {fileID: 2137810815987912663}
   attackState: Attack
 --- !u!65 &8717268818257773334

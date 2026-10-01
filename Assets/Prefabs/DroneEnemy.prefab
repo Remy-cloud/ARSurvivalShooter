@@ -58,8 +58,8 @@ MonoBehaviour:
   separationStrength: 1.5
   approachSpread: 60
   muzzle: {fileID: 2663300215448348756}
-  damage: 10
-  fireCooldown: 1.8
+  damage: 5
+  fireCooldown: 2.5
   hitMask:
     serializedVersion: 2
     m_Bits: 1073741879
